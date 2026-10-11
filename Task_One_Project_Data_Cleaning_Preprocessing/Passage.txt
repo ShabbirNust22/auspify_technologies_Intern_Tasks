@@ -1,0 +1,17 @@
+Task 1 is done. The notebook is Task1_Data_Cleaning_Preprocessing.ipynb. It has already been run, so the outputs are saved in it. It also writes out Netflix_Cleaned.csv, which is the file Task 2 should use.
+
+What the dataset had
+
+Hidden missing values: isnull() shows zero nulls, but director has 2,588 rows and country has 287 rows filled with the text “Not Given”. I turned these into real NaN and then labelled them “Unknown”, because dropping them would lose about 29% of the rows.
+Duplicates: there were 3 obvious ones with different show_ids (9-Feb, 15-Aug, 22-Jul). A fourth was hiding behind trailing whitespace in “Consequences “. It only showed up after I stripped the text columns, so 4 rows were removed in total (8,790 → 8,786).
+Formats: date_added was stored as text. duration mixed minutes and seasons in one column. country and listed_in held several comma-separated values per cell.
+
+Transformations
+
+Dates: date_added is now a proper datetime, with year, month, weekday, quarter and years_to_add columns.
+Duration: split into duration_min for movies and seasons for TV shows.
+Country and genre: primary_country, n_countries, primary_genre and n_genres, plus 0/1 flags for the top 10 genres.
+Ratings: the 14 rating codes are grouped into an ordered audience column (Kids, Older Kids, Teens, Adults, Not Rated).
+Encoding: is_movie as a 0/1 label, with audience one-hot columns also built in the notebook. The exported CSV has 34 columns, 0 nulls (apart from the movie/TV-specific duration columns) and 0 duplicates.
+
+The code has casual comments throughout, and the title carries your name and Colombo. Titles keep their original casing, so names like “iZombie” aren’t mangled. Please check this against your Auspify brief in case the program expects a particular approach, such as dropping nulls instead of filling them. I’m ready for Task 2 (EDA) whenever you send it.
