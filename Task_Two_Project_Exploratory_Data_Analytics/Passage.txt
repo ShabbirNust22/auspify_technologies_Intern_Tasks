@@ -1,0 +1,21 @@
+Task 2 is done: Task2_Exploratory_Data_Analysis.ipynb. It is already run, so all 17 charts and outputs are saved inside it. It reads Netflix_Cleaned.csv from Task 1, so keep that file in the same folder when you open it.
+
+It follows the five steps from the brief:
+
+Structure and statistics: info(), numeric and categorical summaries, and a check of where nulls remain. The only ones left are duration_min and seasons, which is expected since movies have no seasons.
+Distribution by type: movies vs TV shows, titles added per year, release years, movie length with outliers, and seasons per show.
+Top countries and categories: top countries, movie/TV mix by country, top genres overall and per type, ratings and audience groups, and top directors.
+Visualizations: a month × year heatmap, day of the week, the gap between release and addition, and a correlation matrix.
+Summary: the findings are written up at the end of the notebook.
+
+Main findings
+
+Content mix: about 70% of titles are movies and 30% are TV shows. About 67% of TV shows have only one season.
+Growth: additions peaked in 2019 at 2,013 titles. 2021 looks lower only because the data stops on 25 Sep 2021.
+Recency: about 70% of titles were released in 2015 or later.
+Timing: Friday is the most common day for additions, with almost twice as many as any other day.
+Countries: the US (3,240), India (1,056) and the UK (638) make up about 58% of titles with a known country.
+Genres: International Movies, Dramas and Comedies are the biggest categories.
+Audience: adult-rated content is the largest group (about 46%), and TV shows skew more toward kids’ content than movies do.
+
+Caveat for Task 1: every country value is a single country, so the n_countries column I built in Task 1 is just 0/1 (Unknown vs known) and isn’t useful. The notebook flags this, and you could drop that column from the Task 1 notebook if you like.
