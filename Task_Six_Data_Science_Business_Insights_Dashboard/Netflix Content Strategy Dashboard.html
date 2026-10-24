@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Netflix Content Strategy Dashboard</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--fg:#1d1d1f;--mut:#6e6e73;--line:#e3e3e8;--red:#e50914;--grey:#8a8a93;--soft:#fde8ea;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121214;--card:#1c1c1f;--fg:#f2f2f4;--mut:#a0a0a8;--line:#2e2e33;--grey:#7c7c86;--soft:#3a1519;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121214;--card:#1c1c1f;--fg:#f2f2f4;--mut:#a0a0a8;--line:#2e2e33;--grey:#7c7c86;--soft:#3a1519;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:15px;margin:0 0 10px}
+.sub{color:var(--mut);font-size:13px;margin:0 0 16px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--card);color:var(--fg);padding:7px 14px;font:inherit;cursor:pointer}
+.seg button.on{background:var(--red);color:#fff}
+select{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font:inherit}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-size:26px;line-height:1.1}.kpi span{color:var(--mut);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.row i{display:block;height:12px;border-radius:6px;background:var(--red)}
+.row .t{background:var(--line);border-radius:6px}.row em{font-style:normal;color:var(--mut);text-align:right}
+.yrs{display:flex;gap:6px;align-items:flex-end;height:170px}
+.yc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:11px;color:var(--mut)}
+.yc div{width:100%;display:flex;flex-direction:column;justify-content:flex-end;flex:1}
+.yc u{display:block;width:100%;text-decoration:none}
+.leg{font-size:12px;color:var(--mut);margin-top:8px}.leg b{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--mut);font-size:11px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl td{padding:5px 0;border-bottom:1px solid var(--line)}.tbl td+td{text-align:right;font-weight:600}
+ul{margin:0;padding-left:18px}li{margin:6px 0;font-size:13.5px}
+.note{color:var(--mut);font-size:12px;margin-top:14px}
+</style></head><body><main>
+<h1>Netflix Content Strategy Dashboard</h1>
+<p class="sub">Auspify Technologies Data Science Internship · Task 6 · Shabbir Moomin · titles by year added (2014–2021)</p>
+<div class="bar">
+<div class="seg" id="seg"><button data-t="All" class="on">All</button><button data-t="Movie">Movies</button><button data-t="TV Show">TV Shows</button></div>
+<label>From <select id="y0"></select></label><label>To <select id="y1"></select></label>
+</div>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+<div class="card"><h2>Titles added per year</h2><div class="yrs" id="yrs"></div><div class="leg"><b style="background:var(--red)"></b>Movies<b style="background:var(--grey)"></b>TV Shows · dimmed = outside range · 2021* = to 25 Sep</div></div>
+<div class="card"><h2>Top producing countries</h2><div id="ctry"></div></div>
+<div class="card"><h2>Top genres</h2><div id="gen"></div></div>
+<div class="card"><h2>Audience mix</h2><div id="aud"></div></div>
+</div>
+<div class="grid">
+<div class="card"><h2>Forecast: titles added per year (all content)</h2><div id="fc"></div><div class="leg">Damped Holt model · shaded band is a rough ~80% range · ✕ = 2021 actual so far (partial year)</div></div>
+<div class="card"><h2>Audience classifier (Random Forest)</h2><table class="tbl" id="mdl"></table>
+<p class="note" style="margin-top:8px">Predicts Kids / Older Kids / Teens / Adults from metadata only (rating excluded to avoid leakage). Best on Kids, weakest on Teens and Older Kids.</p>
+<h2 style="margin-top:14px">Key recommendations</h2>
+<ul><li>Plan for a flat-to-modest band of about 1,700–2,400 additions a year; volume has plateaued.</li><li>Keep investing in Japan, South Korea and France; review India, whose additions fell 15%.</li><li>67% of series have a single season: use viewing data to guide renewals.</li><li>Use the audience model as a triage tool with human review for unrated titles.</li></ul></div>
+</div>
+<p class="note">Source: provided Netflix titles file (8,786 titles after cleaning). No viewing, cost or revenue data, so insights describe catalogue composition, not viewer demand. Filters apply to the first four panels.</p>
+</main>
+<script>
+const D={"years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021], "cube": {"Movie|2014": {"n": 19, "c": {"United States": 16, "United Kingdom": 3}, "g": {"Documentaries": 8, "Children Family": 4, "International": 2, "Comedies": 2, "Action Adventure": 1}, "a": {"Adults": 9, "Older Kids": 6, "Teens": 2, "Kids": 2}}, "Movie|2015": {"n": 56, "c": {"United States": 39, "Canada": 2, "France": 2, "United Kingdom": 1, "Mexico": 1, "Pakistan": 1}, "g": {"Documentaries": 13, "Comedies": 12, "Dramas": 12, "Children Family": 11, "International": 10, "Independent": 7, "Action Adventure": 2, "Horror": 2, "Thrillers": 2, "Romantic": 1}, "a": {"Adults": 27, "Teens": 11, "Kids": 9, "Not Rated": 5, "Older Kids": 4}}, "Movie|2016": {"n": 251, "c": {"United States": 120, "United Kingdom": 25, "France": 11, "Canada": 11, "India": 11, "Spain": 10, "Mexico": 9, "Pakistan": 8, "Japan": 4}, "g": {"International": 82, "Documentaries": 68, "Dramas": 65, "Comedies": 48, "Independent": 31, "Children Family": 20, "Action Adventure": 18, "Thrillers": 14, "Horror": 8, "Romantic": 7}, "a": {"Adults": 128, "Teens": 46, "Older Kids": 28, "Not Rated": 27, "Kids": 22}}, "Movie|2017": {"n": 836, "c": {"United States": 316, "India": 139, "United Kingdom": 71, "Canada": 39, "France": 26, "Spain": 26, "Mexico": 21, "Japan": 12, "South Korea": 10, "Pakistan": 9}, "g": {"International": 395, "Dramas": 292, "Documentaries": 206, "Comedies": 177, "Independent": 116, "Action Adventure": 97, "Children Family": 78, "Thrillers": 68, "Romantic": 63, "Horror": 35}, "a": {"Adults": 420, "Teens": 214, "Older Kids": 122, "Kids": 58, "Not Rated": 22}}, "Movie|2018": {"n": 1236, "c": {"United States": 382, "India": 322, "United Kingdom": 77, "Canada": 36, "Spain": 29, "France": 22, "Mexico": 18, "Pakistan": 14, "South Korea": 13, "Japan": 9, "Egypt": 1}, "g": {"International": 668, "Dramas": 530, "Comedies": 297, "Action Adventure": 173, "Documentaries": 167, "Independent": 163, "Thrillers": 110, "Romantic": 108, "Children Family": 85, "Horror": 78}, "a": {"Adults": 584, "Teens": 405, "Older Kids": 160, "Kids": 73, "Not Rated": 14}}, "Movie|2019": {"n": 1422, "c": {"United States": 610, "India": 203, "United Kingdom": 100, "Egypt": 51, "Canada": 40, "Spain": 30, "France": 28, "Japan": 19, "Mexico": 17, "Pakistan": 15, "South Korea": 11}, "g": {"International": 609, "Dramas": 562, "Comedies": 419, "Action Adventure": 202, "Independent": 200, "Documentaries": 188, "Romantic": 150, "Children Family": 147, "Thrillers": 134, "Horror": 97}, "a": {"Adults": 668, "Teens": 466, "Older Kids": 205, "Kids": 77, "Not Rated": 6}}, "Movie|2020": {"n": 1284, "c": {"United States": 497, "India": 180, "United Kingdom": 61, "Egypt": 50, "Canada": 44, "France": 38, "Japan": 24, "Spain": 19, "Mexico": 14, "Pakistan": 8, "South Korea": 6}, "g": {"International": 575, "Dramas": 535, "Comedies": 416, "Romantic": 173, "Children Family": 170, "Action Adventure": 170, "Independent": 148, "Thrillers": 133, "Documentaries": 118, "Horror": 77}, "a": {"Adults": 570, "Teens": 421, "Older Kids": 178, "Kids": 115}}, "Movie|2021": {"n": 993, "c": {"United States": 392, "India": 120, "United Kingdom": 49, "France": 21, "Japan": 19, "Pakistan": 16, "Spain": 14, "Canada": 14, "Mexico": 10, "South Korea": 9, "Egypt": 7}, "g": {"Dramas": 412, "International": 408, "Comedies": 299, "Action Adventure": 196, "Children Family": 122, "Romantic": 114, "Thrillers": 112, "Documentaries": 99, "Independent": 89, "Horror": 58}, "a": {"Adults": 446, "Teens": 346, "Older Kids": 116, "Kids": 85}}, "TV Show|2014": {"n": 5, "c": {"United States": 3, "Canada": 1}, "g": {"Comedies": 3, "Dramas": 3, "Kids": 2, "Crime": 1, "Thrillers": 1}, "a": {"Adults": 3, "Kids": 1, "Older Kids": 1}}, "TV Show|2015": {"n": 26, "c": {"United States": 12, "United Kingdom": 6, "Canada": 3, "France": 2, "Pakistan": 1, "Japan": 1}, "g": {"Kids": 9, "Comedies": 8, "Dramas": 8, "International": 3, "Horror": 2, "Action Adventure": 2, "Thrillers": 1, "Crime": 1, "Romantic": 1}, "a": {"Kids": 10, "Older Kids": 6, "Adults": 5, "Teens": 5}}, "TV Show|2016": {"n": 175, "c": {"United States": 57, "United Kingdom": 20, "Pakistan": 13, "Japan": 13, "Canada": 10, "South Korea": 9, "France": 5, "Spain": 2}, "g": {"International": 85, "Dramas": 43, "Romantic": 42, "Kids": 40, "Comedies": 40, "Crime": 27, "Action Adventure": 8, "Horror": 5, "Thrillers": 5}, "a": {"Teens": 58, "Adults": 49, "Kids": 43, "Older Kids": 25}}, "TV Show|2017": {"n": 349, "c": {"United States": 88, "United Kingdom": 50, "Pakistan": 36, "South Korea": 32, "Japan": 18, "India": 14, "Canada": 11, "Mexico": 9, "Spain": 5, "France": 4}, "g": {"International": 205, "Dramas": 130, "Crime": 63, "Comedies": 62, "Romantic": 60, "Kids": 44, "Action Adventure": 16, "Thrillers": 5, "Horror": 4}, "a": {"Teens": 138, "Adults": 93, "Older Kids": 65, "Kids": 50, "Not Rated": 3}}, "TV Show|2018": {"n": 411, "c": {"United States": 131, "Pakistan": 68, "United Kingdom": 42, "Japan": 29, "India": 17, "South Korea": 16, "Canada": 13, "France": 12, "Mexico": 6, "Spain": 6, "Egypt": 1}, "g": {"International": 214, "Dramas": 109, "Comedies": 99, "Crime": 85, "Kids": 64, "Romantic": 44, "Action Adventure": 21, "Horror": 10, "Thrillers": 5}, "a": {"Adults": 194, "Teens": 99, "Kids": 61, "Older Kids": 57}}, "TV Show|2019": {"n": 591, "c": {"United States": 161, "Pakistan": 82, "United Kingdom": 58, "South Korea": 45, "Japan": 41, "India": 18, "France": 17, "Spain": 15, "Mexico": 14, "Canada": 13, "Egypt": 8}, "g": {"International": 334, "Dramas": 163, "Comedies": 117, "Crime": 110, "Romantic": 96, "Kids": 83, "Action Adventure": 40, "Horror": 18, "Thrillers": 13}, "a": {"Adults": 276, "Teens": 161, "Kids": 80, "Older Kids": 74}}, "TV Show|2020": {"n": 595, "c": {"United States": 222, "United Kingdom": 45, "Japan": 44, "Pakistan": 42, "South Korea": 42, "Canada": 20, "India": 17, "France": 15, "Spain": 13, "Mexico": 9, "Egypt": 3}, "g": {"International": 277, "Dramas": 164, "Comedies": 126, "Kids": 108, "Crime": 102, "Romantic": 67, "Action Adventure": 43, "Horror": 22, "Thrillers": 13}, "a": {"Adults": 289, "Teens": 140, "Kids": 112, "Older Kids": 54}}, "TV Show|2021": {"n": 505, "c": {"United States": 165, "Pakistan": 107, "United Kingdom": 30, "Japan": 26, "South Korea": 21, "India": 15, "Canada": 13, "Spain": 12, "France": 10, "Mexico": 10, "Egypt": 2}, "g": {"International": 229, "Dramas": 137, "Comedies": 118, "Kids": 98, "Crime": 78, "Romantic": 60, "Action Adventure": 37, "Horror": 14, "Thrillers": 13}, "a": {"Adults": 233, "Teens": 126, "Kids": 107, "Older Kids": 39}}}, "kpi": {"titles": 8786.0, "movies_pct": 69.7, "tv_pct": 30.3, "countries": 85.0, "median_movie_min": 98.0, "tv_one_season_pct": 67.2, "added_within_1y_pct": 55.0, "adult_pct": 45.6, "kids_pct": 23.4, "us_pct": 36.9}, "models": {"audience": {"acc": 0.638, "f1": 0.623, "cv": 0.624, "baseline": 0.46}}, "forecast": {"hist": {"2010": 1, "2011": 13, "2012": 3, "2013": 11, "2014": 24, "2015": 82, "2016": 426, "2017": 1185, "2018": 1647, "2019": 2013, "2020": 1879}, "fc": {"2021": 2060, "2022": 2240, "2023": 2420}, "low": {"2021": 1692, "2022": 1720, "2023": 1783}, "high": {"2021": 2428, "2022": 2761, "2023": 3057}, "partial2021": 1498, "model": "Holt (damped)"}};
+let type="All",y0=2014,y1=2021;
+const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString("en-US");
+const ys=D.years,sel0=$("y0"),sel1=$("y1");
+ys.forEach(y=>{sel0.add(new Option(y,y));sel1.add(new Option(y,y))});sel1.value=2021;
+const types=()=>type==="All"?["Movie","TV Show"]:[type];
+function agg(){const o={n:0,m:0,t:0,c:{},g:{},a:{}};
+ for(const t of types())for(let y=y0;y<=y1;y++){const v=D.cube[t+"|"+y];if(!v)continue;o.n+=v.n;t==="Movie"?o.m+=v.n:o.t+=v.n;
+  for(const f of["c","g","a"])for(const[k,x]of Object.entries(v[f]))o[f][k]=(o[f][k]||0)+x}
+ return o}
+function bars(el,obj,total,limit){const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,limit),mx=e.length?e[0][1]:1;
+ $(el).innerHTML=e.map(([k,v])=>`<div class="row" title="${k}: ${fmt(v)}"><span>${k}</span><span class="t"><i style="width:${v/mx*100}%"></i></span><em>${total?Math.round(v/total*100):0}%</em></div>`).join("")||"<span class='sub'>No data</span>"}
+function render(){
+ const o=agg(),cs=Object.values(o.c).reduce((a,b)=>a+b,0),top=Object.entries(o.c).sort((a,b)=>b[1]-a[1])[0];
+ const fam=((o.a.Kids||0)+(o.a["Older Kids"]||0));
+ const k=[[fmt(o.n),"titles added in selection"],[o.n?Math.round(o.m/o.n*100)+"% / "+Math.round(o.t/o.n*100)+"%":"–","movies / TV shows"],[top?top[0]:"–",top?Math.round(top[1]/cs*100)+"% of titles with a known country":""],[o.n?Math.round(fam/o.n*100)+"%":"–","kids and older-kids content"]];
+ $("kpis").innerHTML=k.map(([a,b])=>`<div class="card kpi"><b>${a}</b><span>${b}</span></div>`).join("");
+ bars("ctry",o.c,cs,8);bars("gen",o.g,o.n,10);
+ const ord=["Kids","Older Kids","Teens","Adults","Not Rated"],ao={};ord.forEach(a=>{if(o.a[a])ao[a]=o.a[a]});
+ $("aud").innerHTML=ord.filter(a=>ao[a]).map(a=>`<div class="row" title="${a}: ${fmt(ao[a])}"><span>${a}</span><span class="t"><i style="width:${ao[a]/o.n*100}%"></i></span><em>${Math.round(ao[a]/o.n*100)}%</em></div>`).join("")||"<span class='sub'>No data</span>";
+ const tot=y=>types().reduce((s,t)=>s+((D.cube[t+"|"+y]||{}).n||0),0),mx=Math.max(...ys.map(tot),1);
+ $("yrs").innerHTML=ys.map(y=>{const m=type!=="TV Show"?(D.cube["Movie|"+y]||{n:0}).n:0,t=type!=="Movie"?(D.cube["TV Show|"+y]||{n:0}).n:0,dim=y<y0||y>y1?"opacity:.25":"";
+  return `<div class="yc" style="${dim}" title="${y}: ${fmt(m+t)} titles"><div><u style="height:${t/mx*100}%;background:var(--grey)"></u><u style="height:${m/mx*100}%;background:var(--red)"></u></div>${y==2021?"2021*":y}</div>`}).join("")}
+function forecast(){const F=D.forecast,W=600,H=230,L=40,B=26,x0=2014,x1=2023,mxY=3200;
+ const X=y=>L+(y-x0)/(x1-x0)*(W-L-10),Y=v=>H-B-v/mxY*(H-B-10);
+ const hist=Object.keys(F.hist).map(Number).filter(y=>y>=2014).map(y=>`${X(y)},${Y(F.hist[y])}`).join(" ");
+ const fy=[2021,2022,2023],line=[`${X(2020)},${Y(F.hist[2020])}`,...fy.map(y=>`${X(y)},${Y(F.fc[y])}`)].join(" ");
+ const band=[...fy.map(y=>`${X(y)},${Y(F.high[y])}`),...fy.slice().reverse().map(y=>`${X(y)},${Y(F.low[y])}`)].join(" ");
+ let g="";[0,1000,2000,3000].forEach(v=>g+=`<line x1="${L}" x2="${W-10}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`);
+ for(let y=x0;y<=x1;y+=1)g+=`<text x="${X(y)}" y="${H-8}" text-anchor="middle">${y}</text>`;
+ $("fc").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Forecast chart">${g}<polygon points="${band}" fill="var(--red)" opacity=".18"/><polyline points="${hist}" fill="none" stroke="var(--grey)" stroke-width="2.5"/><polyline points="${line}" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-dasharray="6 4"/>${fy.map(y=>`<circle cx="${X(y)}" cy="${Y(F.fc[y])}" r="3.5" fill="var(--red)"><title>${y}: ${fmt(F.fc[y])} (${fmt(F.low[y])}–${fmt(F.high[y])})</title></circle>`).join("")}<text x="${X(2021)}" y="${Y(F.partial2021)+4}" text-anchor="middle" style="fill:var(--fg);font-weight:700">✕</text></svg>`;
+ const M=D.models.audience;$("mdl").innerHTML=[["Test accuracy",Math.round(M.acc*100)+"%"],["5-fold CV accuracy",Math.round(M.cv*100)+"%"],["Macro F1",M.f1.toFixed(2)],["Majority baseline",Math.round(M.baseline*100)+"%"]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}
+$("seg").onclick=e=>{const t=e.target.dataset.t;if(!t)return;type=t;[...$("seg").children].forEach(b=>b.classList.toggle("on",b.dataset.t===t));render()};
+sel0.onchange=()=>{y0=+sel0.value;if(y0>y1){y1=y0;sel1.value=y1}render()};
+sel1.onchange=()=>{y1=+sel1.value;if(y1<y0){y0=y1;sel0.value=y0}render()};
+render();forecast();
+</script></body></html>
